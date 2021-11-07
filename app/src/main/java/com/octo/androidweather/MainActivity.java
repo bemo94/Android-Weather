@@ -34,5 +34,6 @@ public class MainActivity extends AppCompatActivity implements CityForecastView 
     @Override
     public void displayViewModel(ForecastViewModel viewModel) {
         Log.i(TAG, "displayViewModel: " + viewModel);
+        binding.myTextView.setText(viewModel.getTitle());
     }
 }
