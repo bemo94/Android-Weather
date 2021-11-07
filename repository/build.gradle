@@ -1,0 +1,41 @@
+apply plugin: 'com.android.library'
+apply plugin: 'realm-android'
+
+android {
+    compileSdk 31
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 31
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+    }
+}
+dependencies {
+    implementation project(path: ':use-cases')
+    implementation 'androidx.room:room-common:2.3.0'
+    annotationProcessor 'com.google.auto.value:auto-value:1.4'
+    implementation 'com.jakewharton.auto.value:auto-value-annotations:1.4'
+    testImplementation "org.assertj:assertj-core:3.12.2"
+    testImplementation "org.mockito:mockito-core:3.12.4"
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
+    testImplementation 'commons-io:commons-io:2.6'
+    def retrofitVersion = "2.6.4"
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-jackson:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}

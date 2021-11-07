@@ -1,0 +1,12 @@
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "Android Weather"
+include ':app'
+include ':repository'
+include ':presentation'
+include ':use-cases'
