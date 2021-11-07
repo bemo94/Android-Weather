@@ -11,5 +11,5 @@ public abstract class JsonMain {
         return new AutoValue_JsonMain(temperature);
     }
 
-    abstract Float getTemperature();
+    public abstract Float getTemperature();
 }

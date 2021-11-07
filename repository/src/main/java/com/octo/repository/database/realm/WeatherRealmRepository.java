@@ -1,6 +1,7 @@
 package com.octo.repository.database.realm;
 
 import com.octo.repository.CityWeeklyForecast;
+import com.octo.repository.transform.ForecastTransformer;
 
 import io.realm.Realm;
 
@@ -12,9 +13,22 @@ public class WeatherRealmRepository {
     }
 
     public void writeCityWeeklyForecast(final CityWeeklyForecast cityForecast) {
+        final ForecastTransformer transformer = new ForecastTransformer();
+        final RealmCityWeeklyForecast realmCityForecast = transformer.toRealmCityWeeklyForecast(cityForecast);
+        realm.beginTransaction();
+
+        realm.where(RealmForecast.class)
+            .equalTo("cityName", cityForecast.getCityName())
+            .findAll()
+            .deleteAllFromRealm();
+
+        realm.copyToRealmOrUpdate(realmCityForecast);
+        realm.commitTransaction();
     }
 
     public CityWeeklyForecast loadCityWeeklyForecast(final String cityName) {
-        return null;
+        return realm.where(RealmCityWeeklyForecast.class)
+            .equalTo("cityName", cityName)
+            .findFirst();
     }
 }
