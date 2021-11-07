@@ -1,4 +1,6 @@
-apply plugin: 'java'
+plugins {
+    id 'java'
+}
 
 dependencies {
     testImplementation "org.assertj:assertj-core:3.12.2"
