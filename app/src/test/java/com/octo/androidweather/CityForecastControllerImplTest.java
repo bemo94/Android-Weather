@@ -11,11 +11,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-public class CityForecastControllerTest {
+public class CityForecastControllerImplTest {
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
     @InjectMocks
-    private CityForecastController controller;
+    private CityForecastControllerImpl controller;
     @Mock
     private CityForecastInteractor interactor;
 
