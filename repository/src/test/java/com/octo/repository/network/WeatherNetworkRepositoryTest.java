@@ -19,8 +19,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import retrofit2.Retrofit;
 
 public class WeatherNetworkRepositoryTest {
-    @Rule
-    public MockWebServer server = new MockWebServer();
+    @Rule public MockWebServer server = new MockWebServer();
     private WeatherNetworkRepository repository;
     private NetworkModule networkModule;
 
@@ -38,7 +37,7 @@ public class WeatherNetworkRepositoryTest {
             .setBody(FileUtils.read("forecast.json"));
         server.enqueue(response);
 
-        String weather = repository.loadWeatherAsString("paris");
+        final String weather = repository.loadWeatherAsString("paris");
 
         assertThat(weather).isNotEmpty();
     }

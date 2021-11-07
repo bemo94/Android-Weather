@@ -17,6 +17,13 @@ public class WeatherNetworkRepository {
             @Query("appId") final String apiKey,
             @Query("units") final String units
         );
+
+        @GET("forecast")
+        Call<JsonCityWeeklyForecast> getCityWeeklyForecast(
+            @Query("q") final String town,
+            @Query("appId") final String apiKey,
+            @Query("units") final String units
+        );
     }
 
     private static final String API_KEY = "a72ffd88bc68442d7d91981af6832ca1";
@@ -43,6 +50,18 @@ public class WeatherNetworkRepository {
     }
 
     public CityWeeklyForecast loadCityWeeklyForecast(final String town) {
+        try {
+            final Response<JsonCityWeeklyForecast> response = retrofit.create(WeatherService.class)
+                .getCityWeeklyForecast(town, API_KEY, UNITS)
+                .execute();
+
+            if (response.isSuccessful() && response.body() != null) {
+                final ForecastTransformer transformer = new ForecastTransformer();
+                return transformer.toCityWeeklyForecast(response.body());
+            }
+        } catch (IOException e) {
+            System.err.print(e);
+        }
         return null;
     }
 }

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.octo.androidweather.databinding.ActivityMainBinding;
+import com.octo.repository.CityWeeklyForecast;
 import com.octo.repository.network.NetworkModule;
 import com.octo.repository.network.WeatherNetworkRepository;
 
@@ -36,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
         new Thread() {
             @Override
             public void run() {
-                final String weatherAsString = repository.loadWeatherAsString("Paris");
-                Log.i(TAG, "Weather: " + weatherAsString);
+                final CityWeeklyForecast forecast = repository.loadCityWeeklyForecast("Paris");
+                Log.i(TAG, "Forecast: " + forecast);
             }
         }.start();
     }
