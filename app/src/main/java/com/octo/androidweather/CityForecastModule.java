@@ -1,5 +1,6 @@
 package com.octo.androidweather;
 
+import static com.octo.androidweather.BuildConfig.WEATHER_BASE_URL;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 
 import com.nicolasmouchel.executordecorator.ImmutableExecutorDecorator;
@@ -7,17 +8,29 @@ import com.nicolasmouchel.executordecorator.WeakExecutorDecorator;
 import com.octo.presentation.CityForecastPresenterImpl;
 import com.octo.presentation.CityForecastView;
 import com.octo.presentation.DateUtilsInjector;
+import com.octo.repository.network.NetworkModule;
+import com.octo.repository.network.WeatherNetworkRepository;
 import com.octo.usecases.CityForecastInteractor;
 import com.octo.usecases.CityForecastPresenter;
 import com.octo.usecases.CityForecastRepository;
+
+import okhttp3.HttpUrl;
+import retrofit2.Retrofit;
 
 public class CityForecastModule {
     private final CityForecastController controller;
 
     public CityForecastModule(final MainActivity activity) {
-        final CityForecastPresenter outputPort = new CityForecastPresenterImpl(provideCityForecastView(activity), activity.getResources(), new DateUtilsInjector());
-        final CityForecastRepository repository = new MockCityForecastRepository();
-        final CityForecastInteractor interactor = new CityForecastInteractor(repository, outputPort);
+        final CityForecastPresenter presenter = new CityForecastPresenterImpl(
+            provideCityForecastView(activity),
+            activity.getResources(),
+            new DateUtilsInjector()
+        );
+
+        final Retrofit retrofit = new NetworkModule().getRetrofit(HttpUrl.parse(WEATHER_BASE_URL));
+        // Change this
+        final CityForecastRepository repository = new WeatherNetworkRepository(retrofit);
+        final CityForecastInteractor interactor = new CityForecastInteractor(repository, presenter);
         this.controller = provideCityForecastController(new CityForecastControllerImpl(interactor));
     }
 

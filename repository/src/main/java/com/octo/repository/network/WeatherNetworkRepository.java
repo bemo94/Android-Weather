@@ -12,6 +12,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public class WeatherNetworkRepository {
+
     interface WeatherService {
         @GET("forecast")
         Call<String> getWeatherAsString(
