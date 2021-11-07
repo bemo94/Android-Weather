@@ -9,3 +9,4 @@ rootProject.name = "Android Weather"
 include ':app'
 include ':repository'
 include ':use-cases'
+include ':presentation'
