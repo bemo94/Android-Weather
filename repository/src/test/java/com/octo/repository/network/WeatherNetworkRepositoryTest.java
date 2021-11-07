@@ -1,11 +1,11 @@
 package com.octo.repository.network;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import java.io.IOException;
+import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import retrofit2.Retrofit;
 
@@ -23,7 +23,10 @@ public class WeatherNetworkRepositoryTest {
 
     @Test
     public void loadWeatherAsString() throws IOException {
-        final String forecast = FileUtils.read("forecast.json");
+        final MockResponse response = new MockResponse()
+            .setResponseCode(200)
+            .setBody(FileUtils.read("forecast.json"));
+        server.enqueue(response);
 
         String weather = repository.loadWeatherAsString("paris");
 
