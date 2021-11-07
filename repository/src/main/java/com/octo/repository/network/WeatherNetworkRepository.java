@@ -1,5 +1,7 @@
 package com.octo.repository.network;
 
+import com.octo.repository.CityWeeklyForecast;
+
 import java.io.IOException;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -37,6 +39,10 @@ public class WeatherNetworkRepository {
         } catch (IOException e) {
             System.err.print(e);
         }
+        return null;
+    }
+
+    public CityWeeklyForecast loadCityWeeklyForecast(final String town) {
         return null;
     }
 }
