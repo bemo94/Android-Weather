@@ -2,21 +2,17 @@ package com.octo.androidweather;
 
 import static android.content.ContentValues.TAG;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.octo.androidweather.databinding.ActivityMainBinding;
-import com.octo.repository.CityWeeklyForecast;
-import com.octo.repository.network.NetworkModule;
-import com.octo.repository.network.WeatherNetworkRepository;
+import com.octo.presentation.CityForecastView;
+import com.octo.presentation.ForecastViewModel;
 
-import okhttp3.HttpUrl;
-import retrofit2.Retrofit;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CityForecastView {
 
     private ActivityMainBinding binding;
 
@@ -26,20 +22,17 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View activity = binding.getRoot();
         setContentView(activity);
-        logForecast();
+        final CityForecastModule module = new CityForecastModule(this);
+        module.getController().loadCityForecast("Paris");
     }
 
-    private void logForecast() {
-        final NetworkModule networkModule = new NetworkModule();
-        final HttpUrl httpUrl = HttpUrl.parse(BuildConfig.WEATHER_BASE_URL);
-        final Retrofit retrofit = networkModule.getRetrofit(httpUrl);
-        final WeatherNetworkRepository repository = new WeatherNetworkRepository(retrofit);
-        new Thread() {
-            @Override
-            public void run() {
-                final CityWeeklyForecast forecast = repository.loadCityWeeklyForecast("Paris");
-                Log.i(TAG, "Forecast: " + forecast);
-            }
-        }.start();
+    @Override
+    public void displayMessage(String message) {
+        Log.i(TAG, "displayMessage: " + message);
+    }
+
+    @Override
+    public void displayViewModel(ForecastViewModel viewModel) {
+        Log.i(TAG, "displayViewModel: " + viewModel);
     }
 }

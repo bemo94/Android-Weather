@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-class CityForecastInteractor {
+public class CityForecastInteractor {
     private static final int MINIMUM_RELEVANT_HOUR = 8;
     private static final int MAXIMUM_RELEVANT_HOUR = 20;
     private static final int REQUIRED_FORECASTS = 2;
