@@ -47,7 +47,7 @@ class CityForecastInteractor {
             return;
         }
         sortForecastsByAscendingTemperature(relevantForecasts);
-        presenter.onForecasts(worstForecast(relevantForecasts), bestForecast(relevantForecasts));
+        presenter.onForecasts(cityForecast.getCityName(), worstForecast(relevantForecasts), bestForecast(relevantForecasts));
     }
 
     private List<Forecast> getRelevantForecasts(CityWeeklyForecast cityForecast) {

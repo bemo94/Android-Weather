@@ -9,5 +9,5 @@ public interface CityForecastPresenter {
 
     void onUnavailableForecasts();
 
-    void onForecasts(Forecast worstForecast, Forecast bestForecast);
+    void onForecasts(String city, Forecast worstForecast, Forecast bestForecast);
 }

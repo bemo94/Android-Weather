@@ -1,5 +1,12 @@
 package com.octo.usecases;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static java.util.Arrays.asList;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,16 +23,6 @@ import java.util.List;
 import java.util.Locale;
 
 import de.bechte.junit.runners.context.HierarchicalContextRunner;
-
-import com.octo.usecases.CityForecastRepository.GenericException;
-import com.octo.usecases.CityForecastRepository.UnknownCityException;
-
-import static java.util.Arrays.asList;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @RunWith(HierarchicalContextRunner.class)
 public class CityForecastInteractorTest {
@@ -72,9 +69,9 @@ public class CityForecastInteractorTest {
     public class ValidCityName {
         public class NotExistingTown {
             @Test
-            public void loadCityForecast() throws UnknownCityException, GenericException {
+            public void loadCityForecast() throws CityForecastRepository.UnknownCityException, CityForecastRepository.GenericException {
                 final String cityName = "unknown";
-                doThrow(UnknownCityException.class).when(repository).loadCityForecast(cityName);
+                doThrow(CityForecastRepository.UnknownCityException.class).when(repository).loadCityForecast(cityName);
 
                 interactor.loadCityForecast(cityName);
 
@@ -83,10 +80,10 @@ public class CityForecastInteractorTest {
         }
 
         public class ExistingTown {
-            private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-            private DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
-
             private static final String CITY = "city";
+            private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+            private DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
             @Mock
             private CityWeeklyForecast cityForecast;
 
@@ -96,8 +93,8 @@ public class CityForecastInteractorTest {
             }
 
             @Test
-            public void loadCityForecast_WhenGenericException() throws UnknownCityException, GenericException {
-                doThrow(GenericException.class).when(repository).loadCityForecast(CITY);
+            public void loadCityForecast_WhenGenericException() throws CityForecastRepository.UnknownCityException, CityForecastRepository.GenericException {
+                doThrow(CityForecastRepository.GenericException.class).when(repository).loadCityForecast(CITY);
 
                 interactor.loadCityForecast(CITY);
 
@@ -105,7 +102,7 @@ public class CityForecastInteractorTest {
             }
 
             @Test
-            public void loadCityName_WhenNoForecastAreAvailable() throws UnknownCityException, GenericException {
+            public void loadCityName_WhenNoForecastAreAvailable() throws CityForecastRepository.UnknownCityException, CityForecastRepository.GenericException {
                 given(cityForecast.getForecasts()).willReturn(Collections.<Forecast>emptyList());
                 given(repository.loadCityForecast(CITY)).willReturn(cityForecast);
 
@@ -133,14 +130,15 @@ public class CityForecastInteractorTest {
             public void loadCityName_WhenForecastsAreRelevant() throws Exception {
                 final Forecast worstForecast = getMockForecast("2017-10-01 19:40:00", 14f);
                 final Forecast bestForecast = getMockForecast("2017-10-01 16:00:00", 20f);
-                final Forecast unrelevantForecast = getMockForecast("2017-10-01 07:30:00", 12f);
-                final List<Forecast> forecasts = asList(worstForecast, bestForecast, unrelevantForecast);
+                final Forecast unRelevantForecast = getMockForecast("2017-10-01 07:30:00", 12f);
+                final List<Forecast> forecasts = asList(worstForecast, bestForecast, unRelevantForecast);
                 given(cityForecast.getForecasts()).willReturn(forecasts);
+                given(cityForecast.getCityName()).willReturn(CITY);
                 given(repository.loadCityForecast(CITY)).willReturn(cityForecast);
 
                 interactor.loadCityForecast(CITY);
 
-                then(presenter).should().onForecasts(worstForecast, bestForecast);
+                then(presenter).should().onForecasts(CITY, worstForecast, bestForecast);
             }
 
             private Forecast getMockForecast(String dateTime, float temperature) throws ParseException {
