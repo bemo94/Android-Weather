@@ -1,7 +1,5 @@
 package com.octo.repository.network
 
-import android.content.ContentValues
-import android.util.Log
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.http.GET
