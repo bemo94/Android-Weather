@@ -42,7 +42,7 @@ class CityForecastInteractor(
             presenter.onUnavailableForecasts()
         } else {
             val list = sortForecastsByAscendingTemperature(relevantForecasts)()
-            presenter.onForecasts(worstForecast(list), bestForecast(list))
+            presenter.onForecasts(cityForecast.cityName, worstForecast(list), bestForecast(list))
         }
     }
 

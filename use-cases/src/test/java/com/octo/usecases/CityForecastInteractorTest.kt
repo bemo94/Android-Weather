@@ -132,6 +132,7 @@ class CityForecastInteractorTest {
             val bestForecast = getMockForecast("2017-10-01 16:00:00", 20f)
             val unrelevantForecast = getMockForecast("2017-10-01 07:30:00", 12f)
             val forecasts: List<Forecast> = listOf(worstForecast, bestForecast, unrelevantForecast)
+            given(cityForecast.cityName).willReturn(Companion.CITY)
             given(cityForecast.forecasts).willReturn(forecasts)
             given(repository.loadCityWeeklyForecast(Companion.CITY)).willReturn(cityForecast)
 
@@ -139,7 +140,7 @@ class CityForecastInteractorTest {
             interactor.loadCityForecast(Companion.CITY)
 
             // Then
-            then(presenter).should().onForecasts(worstForecast, bestForecast)
+            then(presenter).should().onForecasts(Companion.CITY, worstForecast, bestForecast)
         }
 
         private fun getMockForecast(dateTime: String, temperature: Float): Forecast {

@@ -6,5 +6,5 @@ interface CityForecastPresenter {
     fun onEmptyInput()
     fun onGenericException()
     fun onUnavailableForecasts()
-    fun onForecasts(worstForecast: Forecast?, bestForecast: Forecast?)
+    fun onForecasts(city: String, worstForecast: Forecast, bestForecast: Forecast)
 }
