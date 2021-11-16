@@ -1,17 +1,29 @@
-plugins {
-    id 'java'
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdk 31
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 31
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+    }
 }
 
 dependencies {
+    implementation project(path: ':repository')
     testImplementation "org.assertj:assertj-core:3.12.2"
     testImplementation "org.mockito:mockito-core:3.12.4"
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-inline:3.12.4'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.20"
     testImplementation 'de.bechte.junit:junit-hierarchicalcontextrunner:4.12.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
 }
