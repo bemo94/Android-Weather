@@ -5,8 +5,9 @@ import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Query
 import java.io.IOException
+import javax.inject.Inject
 
-class WeatherNetworkRepository(private val retrofit: Retrofit) {
+class WeatherNetworkRepository @Inject constructor(private val retrofit: Retrofit) {
 
     companion object {
         private const val API_KEY = "a72ffd88bc68442d7d91981af6832ca1"
@@ -32,6 +33,7 @@ class WeatherNetworkRepository(private val retrofit: Retrofit) {
             }
         } catch (e: IOException) {
             System.err.print(e)
+            throw e
         }
         return null
     }

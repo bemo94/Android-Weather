@@ -1,6 +1,8 @@
 package com.octo.usecases
 
 
+import com.octo.presentation.CityForecastDisplayableBuilder
+import com.octo.presentation.ForecastDisplayable
 import org.junit.Test
 import org.mockito.BDDMockito.given
 
@@ -10,6 +12,7 @@ import com.octo.repository.network.CityWeeklyForecast
 import com.octo.repository.network.WeatherNetworkRepository
 import java.util.Locale
 import de.bechte.junit.runners.context.HierarchicalContextRunner
+import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.*
@@ -36,7 +39,7 @@ class CityForecastInteractorTest {
         lateinit var repository: WeatherNetworkRepository
 
         @Mock
-        lateinit var presenter: CityForecastPresenter
+        lateinit var builder: CityForecastDisplayableBuilder
 
         @Before
         fun setup() {
@@ -44,21 +47,21 @@ class CityForecastInteractorTest {
         }
 
         @Test
-        fun loadCityForecast_WhenCityNameIsEmpty() {
+        fun getCityForecastState_WhenCityNameIsEmpty() {
             // When
-            interactor.loadCityForecast("")
+            val result = interactor.getCityForecastState("")
 
             // Then
-            then(presenter).should().onEmptyInput()
+            assertEquals(result, CityForecastInteractor.State.Error)
         }
 
         @Test
         fun loadCityForecast_WhenCityNameIsBlank() {
             // When
-            interactor.loadCityForecast("  ")
+            val result = interactor.getCityForecastState("  ")
 
             // Then
-            then(presenter).should().onEmptyInput()
+            assertEquals(result, CityForecastInteractor.State.Error)
         }
     }
 
@@ -71,7 +74,7 @@ class CityForecastInteractorTest {
         lateinit var repository: WeatherNetworkRepository
 
         @Mock
-        lateinit var presenter: CityForecastPresenter
+        lateinit var builder: CityForecastDisplayableBuilder
 
         private val dateFormat: DateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
 
@@ -87,11 +90,12 @@ class CityForecastInteractorTest {
         fun loadCityForecast_WhenGenericException() {
             // Given
             given(repository.loadCityWeeklyForecast(Companion.CITY)).willAnswer { throw IOException("Ooops") }
+
             // When
-            interactor.loadCityForecast(Companion.CITY)
+            val result = interactor.getCityForecastState(Companion.CITY)
 
             // Then
-            then(presenter).should().onGenericException()
+            assertEquals(result, CityForecastInteractor.State.Error)
         }
 
         @Test
@@ -101,10 +105,10 @@ class CityForecastInteractorTest {
             given(repository.loadCityWeeklyForecast(CITY)).willReturn(cityForecast)
 
             // When
-            interactor.loadCityForecast(CITY)
+            val result = interactor.getCityForecastState(CITY)
 
             // Then
-            then(presenter).should().onUnavailableForecasts()
+            assertEquals(result, CityForecastInteractor.State.Error)
         }
 
         @Test
@@ -119,10 +123,10 @@ class CityForecastInteractorTest {
             given(repository.loadCityWeeklyForecast(CITY)).willReturn(cityForecast)
 
             // When
-            interactor.loadCityForecast(CITY)
+            val result = interactor.getCityForecastState(CITY)
 
             // Then
-            then(presenter).should().onUnavailableForecasts()
+            assertEquals(result, CityForecastInteractor.State.Error)
         }
 
         @Test
@@ -135,12 +139,14 @@ class CityForecastInteractorTest {
             given(cityForecast.cityName).willReturn(Companion.CITY)
             given(cityForecast.forecasts).willReturn(forecasts)
             given(repository.loadCityWeeklyForecast(Companion.CITY)).willReturn(cityForecast)
+            val displayable = mock(ForecastDisplayable::class.java)
+            given(builder.buildForecastsDisplayable(Companion.CITY, worstForecast, bestForecast)).willReturn(displayable)
 
             // When
-            interactor.loadCityForecast(Companion.CITY)
+            val result = interactor.getCityForecastState(Companion.CITY)
 
             // Then
-            then(presenter).should().onForecasts(Companion.CITY, worstForecast, bestForecast)
+            assertEquals(result, CityForecastInteractor.State.Success(displayable))
         }
 
         private fun getMockForecast(dateTime: String, temperature: Float): Forecast {

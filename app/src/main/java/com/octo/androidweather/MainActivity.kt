@@ -2,54 +2,39 @@ package com.octo.androidweather
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.octo.repository.network.NetworkModule
-import com.octo.repository.network.WeatherNetworkRepository
-import android.util.Log
-import android.content.ContentValues
 import android.view.View
 import com.octo.androidweather.databinding.ActivityMainBinding
-import com.octo.presentation.CityForecastView
-import com.octo.presentation.ForecastViewModel
-import kotlinx.coroutines.*
-import okhttp3.HttpUrl
+import com.octo.usecases.CityForecastInteractor.State
+import javax.inject.Inject
 
-class MainActivity : AppCompatActivity(), CityForecastView {
+class MainActivity : AppCompatActivity() {
     private var binding: ActivityMainBinding? = null
+
+    @Inject
+    internal lateinit var viewModel: MainActivityViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        DaggerMainActivityComponent.builder().build().inject(this)
+
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         val activity: View = binding!!.root
         setContentView(activity)
-        loadForecast()
+
+        observeViewModel()
+        viewModel.loadForecasts("paris")
     }
 
-    private fun loadForecast() {
-        CoroutineScope(Dispatchers.IO).launch {
-            CityForecastModule(this@MainActivity).controller.loadCityForecast("paris")
-        }
-    }
-
-    override fun displayEmptyInput() {
-        CoroutineScope(Dispatchers.Main).launch {
-
-        }
-    }
-
-    override fun displayGenericException() {
-        CoroutineScope(Dispatchers.Main).launch {
-
-        }
-    }
-
-    override fun displayUnavailableForecasts() {
-        CoroutineScope(Dispatchers.Main).launch {
-
-        }
-    }
-
-    override fun displayViewModel(viewModel: ForecastViewModel) {
-        CoroutineScope(Dispatchers.Main).launch {
-            println("Test" + viewModel.city)
-        }
+    private fun observeViewModel() {
+        viewModel.displayState.observe(this, { displayState ->
+            when (displayState) {
+                is State.Success -> println("Test" + displayState.displayable.city)
+                is State.Error -> displayState.message
+                else -> {
+                    // do nothing
+                }
+            }
+        })
     }
 }

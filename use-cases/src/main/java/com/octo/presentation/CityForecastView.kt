@@ -4,5 +4,5 @@ interface CityForecastView {
     fun displayEmptyInput()
     fun displayGenericException()
     fun displayUnavailableForecasts()
-    fun displayViewModel(viewModel: ForecastViewModel)
+    fun displayViewModel(displayable: ForecastDisplayable)
 }

@@ -1,15 +1,18 @@
 package com.octo.usecases
 
+import com.octo.presentation.CityForecastDisplayableBuilder
+import com.octo.presentation.ForecastDisplayable
 import com.octo.repository.network.CityWeeklyForecast
 import com.octo.repository.network.Forecast
 import com.octo.repository.network.WeatherNetworkRepository
 import java.io.IOException
 import java.util.*
+import javax.inject.Inject
 import kotlin.collections.ArrayList
 
-class CityForecastInteractor(
+class CityForecastInteractor @Inject constructor (
     private val repository: WeatherNetworkRepository,
-    private val presenter: CityForecastPresenter
+    private val displayableBuilder: CityForecastDisplayableBuilder
 ) {
 
     companion object {
@@ -18,60 +21,65 @@ class CityForecastInteractor(
         private const val REQUIRED_FORECASTS = 2
     }
 
-    fun loadCityForecast(cityName: String) {
-        if (StringUtils.isBlank(cityName)) {
-            presenter.onEmptyInput()
-        } else {
-            handleValidCityName(cityName)
-        }
+    sealed class State {
+        data class Success(val displayable: ForecastDisplayable) : State()
+        data class Error(val message: String) : State()
     }
 
-    private fun handleValidCityName(cityName: String) {
-        try {
-            repository.loadCityWeeklyForecast(cityName)?.let { cityWeeklyForecast ->
-                handleRetrievedForecast(cityWeeklyForecast)
-            }
-        } catch (e: IOException) {
-            presenter.onGenericException()
-        }
+    fun getCityForecastState(cityName: String) = if (StringUtils.isBlank(cityName)) {
+        State.Error("Error city")
+    } else {
+        getHandledValidCityNameState(cityName)
     }
 
-    private fun handleRetrievedForecast(cityForecast: CityWeeklyForecast) {
+    private fun getHandledValidCityNameState(cityName: String): State = try {
+        repository.loadCityWeeklyForecast(town = cityName)?.let { cityWeeklyForecast ->
+            getHandleRetrievedForecastState(cityWeeklyForecast)
+        } ?: State.Error("Error city")
+    } catch (e: IOException) {
+        State.Error("Error city")
+    }
+
+    private fun getHandleRetrievedForecastState(cityForecast: CityWeeklyForecast): State {
         val relevantForecasts: List<Forecast> = getRelevantForecasts(cityForecast)
-        if (relevantForecasts.size < REQUIRED_FORECASTS) {
-            presenter.onUnavailableForecasts()
+        return if (getRelevantForecasts(cityForecast).size < REQUIRED_FORECASTS) {
+            State.Error("Error city")
         } else {
-            val list = sortForecastsByAscendingTemperature(relevantForecasts)()
-            presenter.onForecasts(cityForecast.cityName, worstForecast(list), bestForecast(list))
+            sortForecastsByAscendingTemperature(relevantForecasts)().let { sortedList ->
+                State.Success(
+                    displayable = displayableBuilder.buildForecastsDisplayable(
+                        cityForecast.cityName,
+                        worstForecast(sortedList),
+                        bestForecast(sortedList)
+                    )
+                )
+            }
         }
     }
 
-    private fun getRelevantForecasts(cityForecast: CityWeeklyForecast): List<Forecast> {
-        val relevantForecasts: MutableList<Forecast> = ArrayList()
-        for (forecast in cityForecast.forecasts) {
-            if (isRelevant(forecast)) {
-                relevantForecasts.add(forecast)
-            }
+    private fun getRelevantForecasts(cityForecast: CityWeeklyForecast): List<Forecast> = cityForecast.forecasts.mapNotNull { forecast ->
+        if (isRelevant(forecast)) {
+            forecast
+        } else {
+            null
         }
-        return relevantForecasts
     }
 
     private fun sortForecastsByAscendingTemperature(relevantForecasts: List<Forecast>): () -> List<Forecast> = {
         relevantForecasts.sortedBy { it.temperature }
     }
 
-    private fun bestForecast(sortedForecasts: List<Forecast>): Forecast {
-        return sortedForecasts[sortedForecasts.size - 1]
-    }
+    private fun bestForecast(sortedForecasts: List<Forecast>) = sortedForecasts[sortedForecasts.size - 1]
 
-    private fun worstForecast(sortedForecasts: List<Forecast>): Forecast {
-        return sortedForecasts[0]
-    }
+    private fun worstForecast(sortedForecasts: List<Forecast>) = sortedForecasts[0]
 
     private fun isRelevant(forecast: Forecast): Boolean {
+        return getHourFromDate(forecast.date) in MINIMUM_RELEVANT_HOUR..MAXIMUM_RELEVANT_HOUR
+    }
+
+    private fun getHourFromDate(date: Date): Int {
         val calendar: Calendar = Calendar.getInstance()
-        calendar.time = forecast.date
-        val hours: Int = calendar.get(Calendar.HOUR_OF_DAY)
-        return hours in MINIMUM_RELEVANT_HOUR..MAXIMUM_RELEVANT_HOUR
+        calendar.time = date
+        return calendar.get(Calendar.HOUR_OF_DAY)
     }
 }

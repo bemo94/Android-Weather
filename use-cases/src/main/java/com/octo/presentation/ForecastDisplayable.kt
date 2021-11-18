@@ -1,6 +1,6 @@
 package com.octo.presentation
 
-data class ForecastViewModel(
+data class ForecastDisplayable(
     val city: String,
     val worstTemperatureLabel: String,
     val bestTemperatureLabel: String,
